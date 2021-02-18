@@ -19,6 +19,6 @@ namespace Messanger.Controllers
         public IActionResult GetRole()
         {
             return Ok("Ваша роль: администратор");
-        }
+        }       
     }
 }

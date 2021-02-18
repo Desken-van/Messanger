@@ -8,20 +8,27 @@
     <div id="userInfo" style="display:none;">
         <p>Вы вошли как: <span id="userName"></span></p>
         <input type="button" value="Выйти" id="logOut" />
+        <input type="submit" id="getDataByLogin" value="Данные по логину" />
+        <input type="submit" id="getDataByRole" value="Данные по роли" />
     </div>
     <div id="loginForm">
         <h3>Вход на сайт</h3>
-        <label>Введите email</label><br />
-        <input type="email" id="emailLogin" /> <br /><br />
+        <label>Введите Логин</label><br />
+        <input type="email" id="Login" /> <br /><br />
         <label>Введите пароль</label><br />
         <input type="password" id="passwordLogin" /><br /><br />
+        <input type="button" id="Register" value="Регистрация" />
         <input type="submit" id="submitLogin" value="Логин" />
     </div>
-    <div>
-        <input type="submit" id="getDataByLogin" value="Данные по логину" />
-    </div>
-    <div>
-        <input type="submit" id="getDataByRole" value="Данные по роли" />
+    <div id="registerForm" style="display:none;">
+        <h3>Регистрация</h3>
+        <label>Введите Логин</label><br />
+        <input type="email" id="newLogin" /> <br /><br />
+        <label>Введите пароль</label><br />
+        <input type="password" id="newpass" /><br /><br />
+        <label>Подтвердите пароль</label><br />
+        <input type="password" id="confirm" /><br /><br />
+        <input type="submit" id="newuser" value="Добавить" />
     </div>
 
     <script>
@@ -33,13 +40,13 @@
             // получаем данные формы и фомируем объект для отправки
             const formData = new FormData();
             formData.append("grant_type", "password");
-            formData.append("username", document.getElementById("emailLogin").value);
+            formData.append("username", document.getElementById("Login").value);
             formData.append("password", document.getElementById("passwordLogin").value);
 
             // отправляет запрос и получаем ответ
             const response = await fetch("/token", {
                 method: "POST",
-                headers: {"Accept": "application/json"},
+                headers: { "Accept": "application/json" },
                 body: formData
             });
             // получаем данные
@@ -55,13 +62,37 @@
                 // сохраняем в хранилище sessionStorage токен доступа
                 sessionStorage.setItem(tokenKey, data.access_token);
                 console.log(data.access_token);
-             }
+            }
             else {
                 // если произошла ошибка, из errorText получаем текст ошибки
                 console.log("Error: ", response.status, data.errorText);
             }
         };
-        // отправка запроса к контроллеру ValuesController
+        async function AddUser() {
+
+                const formData = new FormData();
+                formData.append("grant_type", "password");
+                formData.append("username", document.getElementById("newLogin").value);
+                formData.append("password", document.getElementById("newpass").value);
+            const response = await fetch("/register", {
+                method: "POST",
+                headers: { "Accept": "application/json" },
+                body: formData
+            });
+
+            const data = await response.json();
+
+
+            if (response.ok === true) {
+                document.getElementById("userName").innerText = "";
+                document.getElementById("userInfo").style.display = "none";
+                document.getElementById("loginForm").style.display = "block";
+                document.getElementById("registerForm").style.display = "none";
+            }
+            else {
+                console.log("Error: ", response.status, data.errorText);
+            }          
+        };
         async function getData(url) {
             const token = sessionStorage.getItem(tokenKey);
 
@@ -69,7 +100,7 @@
                 method: "GET",
                 headers: {
                     "Accept": "application/json",
-                    "Authorization": "Bearer " + token  // передача токена в заголовке
+                    "Authorization": "Bearer " + token  
                 }
             });
             if (response.ok === true) {
@@ -81,14 +112,20 @@
                 console.log("Status: ", response.status);
         };
 
-        // получаем токен
+        document.getElementById("Register").addEventListener("click", e => {
+
+            e.preventDefault();
+            document.getElementById("userName").innerText = "";
+            document.getElementById("userInfo").style.display = "none";
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("registerForm").style.display = "block";
+        });
         document.getElementById("submitLogin").addEventListener("click", e => {
 
             e.preventDefault();
             getTokenAsync();
         });
 
-        // условный выход - просто удаляем токен и меняем видимость блоков
         document.getElementById("logOut").addEventListener("click", e => {
 
             e.preventDefault();
@@ -99,18 +136,16 @@
         });
 
 
-        // кнопка получения имя пользователя  - /api/values/getlogin
         document.getElementById("getDataByLogin").addEventListener("click", e => {
 
             e.preventDefault();
             getData("/api/values/getlogin");
         });
 
-        // кнопка получения роли  - /api/values/getrole
-        document.getElementById("getDataByRole").addEventListener("click", e => {
+        document.getElementById("newuser").addEventListener("click", e => {
 
             e.preventDefault();
-            getData("/api/values/getrole");
+            AddUser();          
         });
     </script>
 </body>

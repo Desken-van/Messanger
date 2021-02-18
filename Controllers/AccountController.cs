@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Messanger.Models; // класс Person
+using Messanger.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Messanger.Controllers
 {
@@ -64,5 +65,21 @@ namespace Messanger.Controllers
             // если пользователя не найдено
             return null;
         }
+        [HttpPost("/register")]
+        public IActionResult Register(string username, string password)
+        {
+            Account user = new Account();
+            user.Login = username;
+            user.Password = password;
+            user.Role = "User";
+            if (user == null)
+            {
+                return BadRequest();
+            }
+            db.Logins.Add(user);
+            db.SaveChanges();
+            var response = Ok();
+            return Json(response);
+        }
     }
-} 
+}
