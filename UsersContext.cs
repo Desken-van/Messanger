@@ -26,7 +26,7 @@ namespace Messanger
 
                 entity.Property(e => e.Password)
                     .IsRequired()
-                    .HasMaxLength(20)
+                    .HasMaxLength(200)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Role)

@@ -69,29 +69,30 @@
             }
         };
         async function AddUser() {
+                if (document.getElementById("newpass").value == document.getElementById("confirm").value) {
+                    const formData = new FormData();
+                    formData.append("grant_type", "password");
+                    formData.append("username", document.getElementById("newLogin").value);
+                    formData.append("password", document.getElementById("newpass").value);
+                    const response = await fetch("/register", {
+                        method: "POST",
+                        headers: { "Accept": "application/json" },
+                        body: formData
+                    });
 
-                const formData = new FormData();
-                formData.append("grant_type", "password");
-                formData.append("username", document.getElementById("newLogin").value);
-                formData.append("password", document.getElementById("newpass").value);
-            const response = await fetch("/register", {
-                method: "POST",
-                headers: { "Accept": "application/json" },
-                body: formData
-            });
-
-            const data = await response.json();
+                    const data = await response.json();
 
 
-            if (response.ok === true) {
-                document.getElementById("userName").innerText = "";
-                document.getElementById("userInfo").style.display = "none";
-                document.getElementById("loginForm").style.display = "block";
-                document.getElementById("registerForm").style.display = "none";
-            }
-            else {
-                console.log("Error: ", response.status, data.errorText);
-            }          
+                    if (response.ok === true) {
+                        document.getElementById("userName").innerText = "";
+                        document.getElementById("userInfo").style.display = "none";
+                        document.getElementById("loginForm").style.display = "block";
+                        document.getElementById("registerForm").style.display = "none";
+                    }
+                    else {
+                        console.log("Error: ", response.status, data.errorText);
+                    }
+                }                     
         };
         async function getData(url) {
             const token = sessionStorage.getItem(tokenKey);
