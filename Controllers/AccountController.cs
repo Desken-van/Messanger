@@ -42,11 +42,21 @@ namespace Messanger.Controllers
                         expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
                         signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
                 var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
+                SMS[] bigdata = db.Sms.ToArray();
+                List<string> data = new List<string>();
+                for (int i = 0; i < bigdata.Length; i++)
+                {
+                    if (user.Id == bigdata[i].Sender)
+                    {
+                        data.Add(Convert.ToString(bigdata[i].Sms));
+                    }
+                }
+                
                 var response = new
                 {
                     access_token = encodedJwt,
-                    username = identity.Name
+                    username = identity.Name,
+                    data
                 };
 
                 return Json(response);
@@ -76,7 +86,7 @@ namespace Messanger.Controllers
         [HttpPost("/register")]
         public IActionResult Register(string username, string password)
         {
-            if (password.Length > 12 && password.Length < 4)
+            if (password.Length < 12 && password.Length > 4)
             {
                 Account user = new Account();
                 user.Login = username;
@@ -94,6 +104,38 @@ namespace Messanger.Controllers
             else {
                return BadRequest(new { errorText = "Invalid username or password." });
             }
+        }
+        [HttpPost("/sms")]
+        public IActionResult Sms(string username,string text)
+        {
+            Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+            SMS sms = new SMS
+            {
+                Sender = user.Id,
+                Sms = text,
+                Recipient = 2,
+                Number = 1
+            };
+            if (sms == null || user == null )
+                {
+                    return BadRequest();
+                }
+            db.Sms.Add(sms);
+            db.SaveChanges();
+            SMS[] bigdata = db.Sms.ToArray();
+            List<string> data = new List<string>();
+            for(int i = 0;i < bigdata.Length;i++)
+            {
+                if(user.Id == bigdata[i].Sender)
+                {
+                    data.Add(Convert.ToString(bigdata[i].Sms));
+                }
+            }                                 
+            var response = new
+            {
+                data
+            };
+            return Json(response);
         }
         public static string HashPassword(string password)
         {

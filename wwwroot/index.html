@@ -6,7 +6,10 @@
 </head>
 <body>
     <div id="userInfo" style="display:none;">
-        <p>Вы вошли как: <span id="userName"></span></p>
+        <p>Вы вошли как: <span id="userName"></span></p><br /><br />
+        <p><span id="sms"></span></p>
+        <input type="email" id="Text" /> <br /><br />
+        <input type="submit" value="Отправить" id="Send" /><br /><br />
         <input type="button" value="Выйти" id="logOut" />
         <input type="submit" id="getDataByLogin" value="Данные по логину" />
         <input type="submit" id="getDataByRole" value="Данные по роли" />
@@ -57,6 +60,7 @@
 
                 // изменяем содержимое и видимость блоков на странице
                 document.getElementById("userName").innerText = data.username;
+                document.getElementById("sms").innerText = data.data;
                 document.getElementById("userInfo").style.display = "block";
                 document.getElementById("loginForm").style.display = "none";
                 // сохраняем в хранилище sessionStorage токен доступа
@@ -94,6 +98,30 @@
                     }
                 }                     
         };
+        async function SendTo() {        
+            const formData = new FormData();
+            formData.append("grant_type", "grant_type");
+            formData.append("username", document.getElementById("Login").value);
+            formData.append("text", document.getElementById("Text").value);
+                const response = await fetch("/sms", {
+                    method: "POST",
+                    headers: { "Accept": "application/json" },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+
+                if (response.ok === true) {
+                    document.getElementById("sms").innerText = data.data;
+                    document.getElementById("userInfo").style.display = "block";
+                    document.getElementById("loginForm").style.display = "none";
+                    document.getElementById("registerForm").style.display = "none";
+                }
+                else {
+                    console.log("Error: ", response.status, data.errorText);
+                }           
+        };
         async function getData(url) {
             const token = sessionStorage.getItem(tokenKey);
 
@@ -112,7 +140,11 @@
             else
                 console.log("Status: ", response.status);
         };
+        document.getElementById("Send").addEventListener("click", e => {
 
+            e.preventDefault();
+            SendTo();
+        });
         document.getElementById("Register").addEventListener("click", e => {
 
             e.preventDefault();
