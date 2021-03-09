@@ -8,6 +8,7 @@ using System.Security.Claims;
 using Messanger.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Messanger.Controllers
 {
@@ -22,6 +23,10 @@ namespace Messanger.Controllers
         public IActionResult Token(string username, string password)
         {
             Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+            if (user == null)
+            {
+                return BadRequest();
+            }
             bool confirm;
             confirm = VerifyHashedPassword(user.Password,password);
             if (confirm == true)
@@ -42,21 +47,19 @@ namespace Messanger.Controllers
                         expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
                         signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
                 var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-                SMS[] bigdata = db.Sms.ToArray();
-                List<string> data = new List<string>();
+                              
+                Account[] bigdata = db.Logins.ToArray();
+                List<string> datausers = new List<string>();
                 for (int i = 0; i < bigdata.Length; i++)
-                {
-                    if (user.Id == bigdata[i].Sender)
-                    {
-                        data.Add(Convert.ToString(bigdata[i].Sms));
-                    }
+                {                   
+                datausers.Add(Convert.ToString(bigdata[i].Login));                   
                 }
-                
+
                 var response = new
                 {
                     access_token = encodedJwt,
                     username = identity.Name,
-                    data
+                    datausers
                 };
 
                 return Json(response);
@@ -106,31 +109,74 @@ namespace Messanger.Controllers
             }
         }
         [HttpPost("/sms")]
-        public IActionResult Sms(string username,string text)
+        public IActionResult Sms(string username,string text , string recepient)
         {
             Account user = db.Logins.FirstOrDefault(x => x.Login == username);
-            SMS sms = new SMS
+            if (user == null)
             {
-                Sender = user.Id,
-                Sms = text,
-                Recipient = 2,
-                Number = 1
-            };
-            if (sms == null || user == null )
+                return BadRequest();
+            }
+            if (user.Role == "Admin")
+            {               
+                var response = new
+                {
+                    
+                };
+                return Json(response);
+            }
+            else
+            {
+                Account admin = db.Logins.FirstOrDefault(x => x.Role == "Admin");
+                SMS sms = new SMS
+                {
+                    Sender = user.Id,
+                    Sms = text,
+                    Recipient = admin.Id,
+                    Number = 1
+                };
+                if (sms == null || user == null || admin == null)
                 {
                     return BadRequest();
                 }
-            db.Sms.Add(sms);
-            db.SaveChanges();
+                db.Sms.Add(sms);
+                db.SaveChanges();
+                var response = Ok();
+                return Json(response);
+            }
+        }
+        [HttpPost("/Userlist")]
+        public IActionResult UserList()
+        {
+            Account[] bigdata = db.Logins.ToArray();
+            List<string> datausers = new List<string>();
+            for (int i = 0; i < bigdata.Length; i++)
+            {
+                datausers.Add(Convert.ToString(bigdata[i].Login));
+            }
+            var response = new
+            {
+                datausers
+            };
+            return Json(response);
+        }
+        [HttpPost ("/Smslist")]
+        public IActionResult SmsList(string username,string recepient)
+        {
+            Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+            Account recepienter = db.Logins.FirstOrDefault(x => x.Login == recepient);
+            if (user == null || recepient == null)
+            {
+                return BadRequest();
+            }
             SMS[] bigdata = db.Sms.ToArray();
             List<string> data = new List<string>();
-            for(int i = 0;i < bigdata.Length;i++)
+            for (int i = 0; i < bigdata.Length; i++)
             {
-                if(user.Id == bigdata[i].Sender)
+                if (user.Id == bigdata[i].Sender && recepienter.Id == bigdata[i].Recipient)
                 {
                     data.Add(Convert.ToString(bigdata[i].Sms));
                 }
-            }                                 
+            }
             var response = new
             {
                 data
