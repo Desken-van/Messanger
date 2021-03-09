@@ -91,10 +91,19 @@ namespace Messanger.Controllers
         {
             if (password.Length < 12 && password.Length > 4)
             {
+                Account[] bigdata = db.Logins.ToArray();
+                for(int i = 0;i < bigdata.Length;i++)
+                {
+                    if (username == bigdata[i].Login)
+                    {
+                        return BadRequest();
+                    }
+                }
                 Account user = new Account();
                 user.Login = username;
                 user.Password = HashPassword(password);
                 user.Role = "User";
+                user.Status = "Active";
                 if (user == null)
                 {
                     return BadRequest();
@@ -115,17 +124,7 @@ namespace Messanger.Controllers
             if (user == null)
             {
                 return BadRequest();
-            }
-            if (user.Role == "Admin")
-            {               
-                var response = new
-                {
-                    
-                };
-                return Json(response);
-            }
-            else
-            {
+            }                       
                 Account admin = db.Logins.FirstOrDefault(x => x.Role == "Admin");
                 SMS sms = new SMS
                 {
@@ -141,8 +140,7 @@ namespace Messanger.Controllers
                 db.Sms.Add(sms);
                 db.SaveChanges();
                 var response = Ok();
-                return Json(response);
-            }
+                return Json(response);           
         }
         [HttpPost("/Userlist")]
         public IActionResult UserList()
@@ -182,6 +180,96 @@ namespace Messanger.Controllers
                 data
             };
             return Json(response);
+        }
+        [HttpPost("/block")]
+        public IActionResult Block(string admin, string username )
+        {
+            if (admin == null || username == null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                Account Admin = db.Logins.FirstOrDefault(x => x.Login == admin);
+                if (Admin.Role == "Admin")
+                {
+                    Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                    if (user.Status == "Active")
+                    {
+                        user.Status = "Blocked";
+                        db.Logins.Update(user);
+                        db.SaveChanges();
+                        var response = Ok();
+                        return Json(response);
+                    }
+                    else
+                    {
+                        var response = Ok();
+                        return Json(response);
+                    }
+                }
+                else return BadRequest();
+            }
+        }
+        [HttpPost("/unblock")]
+        public IActionResult UnBlock(string admin, string username)
+        {
+            if (admin == null || username == null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                Account Admin = db.Logins.FirstOrDefault(x => x.Login == admin);
+                if (Admin.Role == "Admin")
+                {
+                    Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                    if (user.Status == "Blocked")
+                    {
+                        user.Status = "Active";
+                        db.Logins.Update(user);
+                        db.SaveChanges();
+                        var response = Ok();
+                        return Json(response);
+                    }
+                    else
+                    {
+                        var response = Ok();
+                        return Json(response);
+                    }
+                }
+                else return BadRequest();
+            }
+        }
+        [HttpPost("/putrole")]
+        public IActionResult Putrole(string admin, string username)
+        {
+            if (admin == null || username == null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                Account Admin = db.Logins.FirstOrDefault(x => x.Login == admin);
+                if (Admin.Role == "Admin")
+                {
+                    Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                    if (user.Role == "User")
+                    {
+                        user.Role = "Admin";
+                        db.Logins.Update(user);
+                        db.SaveChanges();
+                        var response = Ok();
+                        return Json(response);
+                    }
+                    else
+                    {
+                        var response = Ok();
+                        return Json(response);
+                    }
+                }
+                else return BadRequest();
+            }
         }
         public static string HashPassword(string password)
         {
