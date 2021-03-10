@@ -4,17 +4,25 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Configuration;
+using System.Text;
 
 namespace Messanger
 {
     public class Startup
-    {
+    {       
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+        public IConfiguration Configuration { get; }
+        public AuthOptions authoption { get; private set; }        
+              
         public void ConfigureServices(IServiceCollection services)
         {
-            string con = "Server=(localdb)\\mssqllocaldb;Database=Users;Trusted_Connection=True;";
-            // устанавливаем контекст данных
-            services.AddDbContext<UsersContext>(options => options.UseSqlServer(con));
-
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<UsersContext>(options => options.UseSqlServer(connection));
+            authoption = Configuration.GetSection(AuthOptions.Option).Get<AuthOptions>();
             // установка конфигурации подключения
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -26,22 +34,19 @@ namespace Messanger
                     {
                         options.RequireHttpsMetadata = false;
                         options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            // укзывает, будет ли валидироваться издатель при валидации токена
+                        {                            
                             ValidateIssuer = true,
-                            // строка, представляющая издателя
-                            ValidIssuer = AuthOptions.ISSUER,
 
-                            // будет ли валидироваться потребитель токена
+                            ValidIssuer = authoption.ISSUER,
+
                             ValidateAudience = true,
-                            // установка потребителя токена
-                            ValidAudience = AuthOptions.AUDIENCE,
-                            // будет ли валидироваться время существования
+
+                            ValidAudience = authoption.AUDIENCE,
+
                             ValidateLifetime = true,
 
-                            // установка ключа безопасности
-                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-                            // валидация ключа безопасности
+                            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(authoption.KEY),
+
                             ValidateIssuerSigningKey = true,
                         };
                     });
