@@ -9,19 +9,26 @@ using Messanger.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 
 namespace Messanger.Controllers
 {
     public class AccountController : Controller
     {
         UsersContext db;
-        public AccountController(UsersContext context)
+        public AccountController(UsersContext context, IConfiguration configuration)
         {
             db = context;
+            Configuration = configuration;
         }
+        public IConfiguration Configuration { get; }
+        public AuthOptions authoption { get; private set; }
+        
+        
         [HttpPost("/token")]
         public IActionResult Token(string username, string password)
         {
+            authoption = Configuration.GetSection(AuthOptions.Option).Get<AuthOptions>();
             Account user = db.Logins.FirstOrDefault(x => x.Login == username);
             if (user == null)
             {
@@ -40,12 +47,12 @@ namespace Messanger.Controllers
                 var now = DateTime.UtcNow;
                 // создаем JWT-токен
                 var jwt = new JwtSecurityToken(
-                        issuer: AuthOptions.ISSUER,
-                        audience: AuthOptions.AUDIENCE,
+                        issuer: authoption.ISSUER,
+                        audience: authoption.AUDIENCE,
                         notBefore: now,
                         claims: identity.Claims,
                         expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                        signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                        signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(authoption.KEY), SecurityAlgorithms.HmacSha256));
                 var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
                               
                 Account[] bigdata = db.Logins.ToArray();
