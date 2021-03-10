@@ -132,15 +132,15 @@ namespace Messanger.Controllers
             {
                 return BadRequest();
             }                       
-                Account admin = db.Logins.FirstOrDefault(x => x.Role == "Admin");
+                Account Recepient = db.Logins.FirstOrDefault(x => x.Login == recepient);
                 SMS sms = new SMS
                 {
                     Sender = user.Id,
                     Sms = text,
-                    Recipient = admin.Id,
+                    Recipient = Recepient.Id,
                     Number = 1
                 };
-                if (sms == null || user == null || admin == null)
+                if (sms == null || user == null || Recepient == null)
                 {
                     return BadRequest();
                 }
