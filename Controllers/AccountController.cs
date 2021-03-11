@@ -54,19 +54,12 @@ namespace Messanger.Controllers
                         expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
                         signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(authoption.KEY), SecurityAlgorithms.HmacSha256));
                 var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-                              
-                Account[] bigdata = db.Logins.ToArray();
-                List<string> datausers = new List<string>();
-                for (int i = 0; i < bigdata.Length; i++)
-                {                   
-                datausers.Add(Convert.ToString(bigdata[i].Login));                   
-                }
-
+                ///////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////
                 var response = new
                 {
                     access_token = encodedJwt,
                     username = identity.Name,
-                    datausers
                 };
 
                 return Json(response);
@@ -155,8 +148,12 @@ namespace Messanger.Controllers
             Account[] bigdata = db.Logins.ToArray();
             List<string> datausers = new List<string>();
             for (int i = 0; i < bigdata.Length; i++)
-            {
-                datausers.Add(Convert.ToString(bigdata[i].Login));
+            {             
+                if(bigdata[i].Status == "Blocked")
+                {
+                    datausers.Add(Convert.ToString(bigdata[i].Login) + "*");
+                }
+                else datausers.Add(Convert.ToString(bigdata[i].Login));
             }
             var response = new
             {
@@ -174,17 +171,17 @@ namespace Messanger.Controllers
                 return BadRequest();
             }
             SMS[] bigdata = db.Sms.ToArray();
-            List<string> data = new List<string>();
+            List<string> datasms = new List<string>();
             for (int i = 0; i < bigdata.Length; i++)
             {
                 if (user.Id == bigdata[i].Sender && recepienter.Id == bigdata[i].Recipient)
                 {
-                    data.Add(Convert.ToString(bigdata[i].Sms));
+                    datasms.Add(Convert.ToString(bigdata[i].Sms));                    
                 }
             }
             var response = new
             {
-                data
+                datasms
             };
             return Json(response);
         }
