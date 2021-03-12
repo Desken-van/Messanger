@@ -58,23 +58,25 @@
                 headers: { "Accept": "application/json" },
                 body: formData
             });
-            const login = await response.json();
-
-            const responselist = await fetch("/Userlist", {
-                method: "POST",
-                headers: { "Accept": "application/json" },
-                body: formData
-            });
-            const data = await responselist.json();
+            const login = await response.json();           
 
             if (response.ok === true) {                
 
-                document.getElementById("userName").innerText = login.username;
-                document.getElementById("list").innerText = data.datausers; 
+                document.getElementById("userName").innerText = login.username;               
                 document.getElementById("userInfo").style.display = "block";
                 document.getElementById("loginForm").style.display = "none";
-                sessionStorage.setItem(tokenKey, data.access_token);
-                console.log(data.access_token);
+                sessionStorage.setItem(tokenKey, login.access_token);
+                const token = sessionStorage.getItem(tokenKey);
+                const responselist = await fetch("/Userlist", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: formData
+                });
+                const data = await responselist.json();
+                document.getElementById("list").innerText = data.datausers; 
             }
             else {
                 console.log("Error: ", response.status, data.errorText);
@@ -124,7 +126,10 @@
             });
             const responselist = await fetch("/Smslist", {
                 method: "POST",
-                headers: { "Accept": "application/json" },
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
                 body: formData
             });
             const data = await responselist.json();
@@ -159,6 +164,7 @@
                 console.log("Status: ", response.status);
         };
         async function Choosechat() {
+            const token = sessionStorage.getItem(tokenKey);
             const formData = new FormData();
             formData.append("grant_type", "grant_type");
             formData.append("username", document.getElementById("Login").value);
@@ -166,7 +172,10 @@
             
             const responselist = await fetch("/Smslist", {
                 method: "POST",
-                headers: { "Accept": "application/json" },
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
                 body: formData
             });
             const data = await responselist.json();
@@ -183,6 +192,7 @@
             }
         };
         async function Block() {
+            const token = sessionStorage.getItem(tokenKey);
             const formData = new FormData();
             formData.append("grant_type", "grant_type");
             formData.append("admin", document.getElementById("Login").value);
@@ -190,12 +200,18 @@
 
             const response = await fetch("/block", {
                 method: "POST",
-                headers: { "Accept": "application/json" },
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
                 body: formData
             });
             const responselist = await fetch("/Userlist", {
                 method: "POST",
-                headers: { "Accept": "application/json" },
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
                 body: formData
             });
             const data = await responselist.json();
@@ -253,6 +269,11 @@
             getData("/api/values/getlogin");
         });
 
+        document.getElementById("getDataByRole").addEventListener("click", e => {
+
+            e.preventDefault();
+            getData("/api/values/getrole");
+        }); 
         document.getElementById("newuser").addEventListener("click", e => {
 
             e.preventDefault();
