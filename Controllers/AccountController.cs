@@ -30,6 +30,10 @@ namespace Messanger.Controllers
         public IActionResult Token(string username, string password)
         {           
             Account user = db.Logins.FirstOrDefault(x => x.Login == username);           
+            if (user == null)
+            {
+                return BadRequest();
+            }
             bool confirm;
             confirm = VerifyHashedPassword(user.Password,password);
             if (confirm == false)
@@ -43,7 +47,14 @@ namespace Messanger.Controllers
                 {
                     return BadRequest(new { errorText = "Invalid username or password." });
                 }
-                var identity = GetIdentity(account);                
+                Person person = new Person
+                {
+                    Login = account.Login,
+                    Password = account.Password,
+                    Role = account.Role,
+                    Status = account.Status
+                };               
+                var identity = GetIdentity(person);                
                 authoption = Configuration.GetSection("Option").Get<AuthOptions>();
                 var response = new
                 {
@@ -54,8 +65,7 @@ namespace Messanger.Controllers
                 return Json(response);
             }            
         }
-
-        private static string JWT(AuthOptions option ,ClaimsIdentity identity)
+        private static dynamic JWT(AuthOptions option ,ClaimsIdentity identity)
         {
             var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(option.Key));
             var now = DateTime.UtcNow;
@@ -69,9 +79,9 @@ namespace Messanger.Controllers
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             return encodedJwt;
         }
-        private ClaimsIdentity GetIdentity(Account account)
+        private ClaimsIdentity GetIdentity(Person account)
         {
-            Account login = account;
+            Person login = account;
             if (login != null)
             {
                 var claims = new List<Claim>
@@ -89,7 +99,7 @@ namespace Messanger.Controllers
         [HttpPost("/register")]
         public IActionResult Register(string username, string password)
         {
-            if (password.Length > 12 && password.Length < 4)
+            if ((password.Length > 12 && password.Length < 4)||username == null)
             {
                 return BadRequest(new { errorText = "Invalid username or password." });
             }
