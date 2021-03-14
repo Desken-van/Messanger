@@ -13,7 +13,8 @@
         <input type="submit" value="Выбрать" id="Choose" /><br /><br />
         <input type="button" id="Block" value="Заблокировать" />
         <input type="button" id="UnBlock" value="Разблокировать" />
-        <input type="button" id="PutRole" value="Сделать админом" /><br /><br />
+        <input type="button" id="PutRole" value="Сделать админом" />
+        <input type="button" id="UnRole" value="Сделать пользователем" /><br /><br />
         <label>Смс</label><br />
         <p><span id="smslist"></span></p>
         <input type="text" id="Text" /> <br /><br />
@@ -194,8 +195,6 @@
         async function Block() {
             const token = sessionStorage.getItem(tokenKey);
             const formData = new FormData();
-            formData.append("grant_type", "grant_type");
-            formData.append("admin", document.getElementById("Login").value);
             formData.append("username", document.getElementById("Recepient").value);
 
             const response = await fetch("/block", {
@@ -224,6 +223,114 @@
                 console.log("Error: ", response.status, data.errorText);
             }
         };
+        async function UnBlock() {
+            const token = sessionStorage.getItem(tokenKey);
+            const formData = new FormData();
+            formData.append("username", document.getElementById("Recepient").value);
+
+            const response = await fetch("/unblock", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            });
+            const responselist = await fetch("/Userlist", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            });
+            const data = await responselist.json();
+
+
+            if (response.ok === true) {
+                document.getElementById("list").innerText = data.datausers;
+            }
+            else {
+                console.log("Error: ", response.status, data.errorText);
+            }
+        };
+        async function PutRole() {
+            const token = sessionStorage.getItem(tokenKey);
+            const formData = new FormData();
+            formData.append("username", document.getElementById("Recepient").value);
+
+            const response = await fetch("/putrole", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            });
+            const responselist = await fetch("/Userlist", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            });
+            const data = await responselist.json();
+
+
+            if (response.ok === true) {
+                document.getElementById("list").innerText = data.datausers;
+            }
+            else {
+                console.log("Error: ", response.status, data.errorText);
+            }
+        };
+        async function UnRole() {
+            const token = sessionStorage.getItem(tokenKey);
+            const formData = new FormData();
+            formData.append("username", document.getElementById("Recepient").value);
+
+            const response = await fetch("unrole", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            });
+            const responselist = await fetch("/Userlist", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: formData
+            });
+            const data = await responselist.json();
+
+
+            if (response.ok === true) {
+                document.getElementById("list").innerText = data.datausers;
+            }
+            else {
+                console.log("Error: ", response.status, data.errorText);
+            }
+        };
+        document.getElementById("UnRole").addEventListener("click", e => {
+
+            e.preventDefault();
+            UnRole();
+        });
+        document.getElementById("PutRole").addEventListener("click", e => {
+
+            e.preventDefault();
+            PutRole();
+        });
+        document.getElementById("UnBlock").addEventListener("click", e => {
+
+            e.preventDefault();
+            UnBlock();
+        });
         document.getElementById("Block").addEventListener("click", e => {
 
             e.preventDefault();
