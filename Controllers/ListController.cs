@@ -28,6 +28,10 @@ namespace Messanger.Controllers
                 {
                     datausers.Add(Convert.ToString(bigdata[i].Login) + "*");
                 }
+                else if(bigdata[i].Role == "Admin")
+                {
+                    datausers.Add(Convert.ToString("$"+ bigdata[i].Login));
+                }
                 else datausers.Add(Convert.ToString(bigdata[i].Login));
             }
             var response = new
@@ -51,6 +55,10 @@ namespace Messanger.Controllers
             for (int i = 0; i < bigdata.Length; i++)
             {
                 if (user.Id == bigdata[i].Sender && recepienter.Id == bigdata[i].Recipient)
+                {
+                    datasms.Add(Convert.ToString(bigdata[i].Sms));
+                }
+                else if (user.Id == bigdata[i].Recipient && recepienter.Id == bigdata[i].Sender)
                 {
                     datasms.Add(Convert.ToString(bigdata[i].Sms));
                 }

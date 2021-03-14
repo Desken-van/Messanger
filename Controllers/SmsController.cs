@@ -24,22 +24,25 @@ namespace Messanger.Controllers
             {
                 return BadRequest();
             }
-            Account Recepient = db.Logins.FirstOrDefault(x => x.Login == recepient);
-            SMS sms = new SMS
-            {
-                Sender = user.Id,
-                Sms = text,
-                Recipient = Recepient.Id,
-                Number = 1
-            };
-            if (sms == null || user == null || Recepient == null)
+            Account recepienter = db.Logins.FirstOrDefault(x => x.Login == recepient);
+            if (recepienter == null || recepienter.Status == "Blocked")
             {
                 return BadRequest();
             }
-            db.Sms.Add(sms);
-            db.SaveChanges();
-            var response = Ok();
-            return Json(response);
+            else
+            {
+                SMS sms = new SMS
+                {
+                    Sender = user.Id,
+                    Sms = text,
+                    Recipient = recepienter.Id,
+                    Number = 1
+                };               
+                db.Sms.Add(sms);
+                db.SaveChanges();
+                var response = Ok();
+                return Json(response);
+            }
         }             
     }
 }

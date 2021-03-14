@@ -18,18 +18,21 @@ namespace Messanger.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("/block")]
-        public IActionResult Block(string admin, string username)
+        public IActionResult Block(string username)
         {
-            if (admin == null || username == null)
+            if (username == null)
             {
                 return BadRequest();
-            }
+            }           
             else
             {
-                Account Admin = db.Logins.FirstOrDefault(x => x.Login == admin);
-                if (Admin.Role == "Admin")
+                Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                if (user == null)
                 {
-                    Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                    return BadRequest();
+                }
+                else
+                {
                     if (user.Status == "Active")
                     {
                         user.Status = "Blocked";
@@ -40,27 +43,30 @@ namespace Messanger.Controllers
                     }
                     else
                     {
-                        var response = Ok();
+                        var response = Ok("Already blocked");
                         return Json(response);
                     }
                 }
-                else return BadRequest();
+                
             }
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("/unblock")]
-        public IActionResult UnBlock(string admin, string username)
+        public IActionResult UnBlock(string username)
         {
-            if (admin == null || username == null)
+            if (username == null)
             {
                 return BadRequest();
             }
             else
             {
-                Account Admin = db.Logins.FirstOrDefault(x => x.Login == admin);
-                if (Admin.Role == "Admin")
+                Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                if (user == null)
                 {
-                    Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                    return BadRequest();
+                }
+                else
+                {
                     if (user.Status == "Blocked")
                     {
                         user.Status = "Active";
@@ -71,27 +77,30 @@ namespace Messanger.Controllers
                     }
                     else
                     {
-                        var response = Ok();
+                        var response = Ok("Already Active");
                         return Json(response);
                     }
                 }
-                else return BadRequest();
+
             }
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("/putrole")]
-        public IActionResult Putrole(string admin, string username)
+        public IActionResult Putrole(string username)
         {
-            if (admin == null || username == null)
+            if (username == null)
             {
                 return BadRequest();
             }
             else
             {
-                Account Admin = db.Logins.FirstOrDefault(x => x.Login == admin);
-                if (Admin.Role == "Admin")
+                Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                if (user == null)
                 {
-                    Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                    return BadRequest();
+                }
+                else
+                {
                     if (user.Role == "User")
                     {
                         user.Role = "Admin";
@@ -102,11 +111,45 @@ namespace Messanger.Controllers
                     }
                     else
                     {
-                        var response = Ok();
+                        var response = Ok("Already Admin");
                         return Json(response);
                     }
                 }
-                else return BadRequest();
+
+            }
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPost("/unrole")]
+        public IActionResult Unrole(string username)
+        {
+            if (username == null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+                if (user == null)
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    if (user.Role == "Admin")
+                    {
+                        user.Role = "User";
+                        db.Logins.Update(user);
+                        db.SaveChanges();
+                        var response = Ok();
+                        return Json(response);
+                    }
+                    else
+                    {
+                        var response = Ok("Already User");
+                        return Json(response);
+                    }
+                }
+
             }
         }
     }
