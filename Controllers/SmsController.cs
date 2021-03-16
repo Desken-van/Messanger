@@ -31,12 +31,18 @@ namespace Messanger.Controllers
             }
             else
             {
+                SMS x = db.Sms.OrderByDescending(x => x.Number).FirstOrDefault();
+                int count = 1;
+                if (x.Number != 0)
+                {
+                    count = 1 + x.Number;
+                }
                 SMS sms = new SMS
                 {
                     Sender = user.Id,
                     Sms = text,
                     Recipient = recepienter.Id,
-                    Number = 1
+                    Number = count
                 };               
                 db.Sms.Add(sms);
                 db.SaveChanges();

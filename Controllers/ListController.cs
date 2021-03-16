@@ -20,20 +20,20 @@ namespace Messanger.Controllers
         [HttpPost("/Userlist")]
         public IActionResult UserList()
         {
-            Account[] bigdata = db.Logins.ToArray();
-            List<string> datausers = new List<string>();
-            for (int i = 0; i < bigdata.Length; i++)
-            {
-                if (bigdata[i].Status == "Blocked")
-                {
-                    datausers.Add(Convert.ToString(bigdata[i].Login) + "*");
-                }
-                else if(bigdata[i].Role == "Admin")
-                {
-                    datausers.Add(Convert.ToString("$"+ bigdata[i].Login));
-                }
-                else datausers.Add(Convert.ToString(bigdata[i].Login));
-            }
+            IQueryable<Account> bigdata = db.Logins;
+            IQueryable<string> users = from p in bigdata
+                                         where p.Role == "User" && p.Status == "Active"
+                                         select p.Login;
+            IQueryable<string> admins = from p in bigdata
+                        where p.Role == "Admin" && p.Status == "Active"
+                        select "$" + p.Login;
+
+            IQueryable<string> blocks = from p in bigdata
+                        where p.Role == "User" && p.Status == "Blocked"
+                        select p.Login + "*";
+
+            var users_and_admins = users.Union(admins);
+            var datausers = users_and_admins.Union(blocks);
             var response = new
             {
                 datausers
@@ -44,30 +44,28 @@ namespace Messanger.Controllers
         [HttpPost("/Smslist")]
         public IActionResult SmsList(string username, string recepient)
         {
-            Account user = db.Logins.FirstOrDefault(x => x.Login == username);
-            Account recepienter = db.Logins.FirstOrDefault(x => x.Login == recepient);
-            if (user == null || recepient == null)
+            if (username == null || recepient == null)
             {
                 return BadRequest();
             }
-            SMS[] bigdata = db.Sms.ToArray();
-            List<string> datasms = new List<string>();
-            for (int i = 0; i < bigdata.Length; i++)
+            Account user = db.Logins.FirstOrDefault(x => x.Login == username);
+            Account recepienter = db.Logins.FirstOrDefault(x => x.Login == recepient);
+            if (user == null || recepienter == null)
             {
-                if (user.Id == bigdata[i].Sender && recepienter.Id == bigdata[i].Recipient)
-                {
-                    datasms.Add(Convert.ToString(bigdata[i].Sms));
-                }
-                else if (user.Id == bigdata[i].Recipient && recepienter.Id == bigdata[i].Sender)
-                {
-                    datasms.Add(Convert.ToString(bigdata[i].Sms));
-                }
+                return BadRequest();
             }
+
+            IQueryable<SMS> bigdata = db.Sms;
+            IQueryable<string> datasms= from p in bigdata
+                                         where (p.Sender == user.Id && p.Recipient == recepienter.Id) || (p.Recipient == user.Id && p.Sender == recepienter.Id)
+                                         orderby p.Number                                 
+                                         select p.Sender +":"+p.Sms;            
+            
             var response = new
             {
                 datasms
             };
             return Json(response);
-        }
+        }      
     }
 }
