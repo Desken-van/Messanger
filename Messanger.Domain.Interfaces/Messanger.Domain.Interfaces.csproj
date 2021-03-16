@@ -62,7 +62,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Messanger.Domain.Core.csproj">
+    <ProjectReference Include="..\Messanger.Domain.Core\Messanger.Domain.Core.csproj">
       <Project>{1f2f0aef-e5f9-432b-bcd5-7b9e9016d2f7}</Project>
       <Name>Messanger.Domain.Core</Name>
     </ProjectReference>
