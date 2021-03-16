@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Messanger.Domain.Core.csproj" />
+    <ProjectReference Include="..\Messanger.Domain.Core\Messanger.Domain.Core.csproj" />
     <ProjectReference Include="..\Messanger.Domain.Interfaces\Messanger.Domain.Interfaces.csproj" />
     <ProjectReference Include="..\Messanger.Infrastructure.Business\Messanger.Infrastructure.Business.csproj" />
     <ProjectReference Include="..\Messanger.Infrastructure.Data\Messanger.Infrastructure.Data.csproj" />
