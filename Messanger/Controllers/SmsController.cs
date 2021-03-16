@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Messanger.Models;
-using Messanger.DataBase;
 using System.Linq;
 using System.Collections.Generic;
 using System;
 using Messanger.Domain.Core;
 using Messanger.Services.Interfaces;
 using Messanger.Domain.Interfaces;
+using Messanger.Infrastructure.Data;
 
 namespace Messanger.Controllers
 {

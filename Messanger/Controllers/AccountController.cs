@@ -11,11 +11,11 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using System.Text;
-using Messanger.DataBase;
 using Messanger.Models.InterfaceModels;
 using Messanger.Domain.Core;
 using Messanger.Domain.Interfaces;
 using Messanger.Services.Interfaces;
+using Messanger.Infrastructure.Data;
 
 namespace Messanger.Controllers
 {

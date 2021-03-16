@@ -32,7 +32,7 @@ namespace Messanger
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<DataBase.UsersContext>(options => options.UseSqlServer(connection));
+            //services.AddDbContext<DataBase.UsersContext>(options => options.UseSqlServer(connection));
             authoption = Configuration.GetSection("Option").Get<AuthorizationOptions>();
             var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(authoption.Key));
             services.AddControllers();
@@ -90,8 +90,7 @@ namespace Messanger
             services.AddTransient<IAddUser, UserAdd>();
             services.AddTransient<IMessageRepository,MessageRepository >();
             services.AddTransient<IAddSms,SmsAdd>();
-            services.AddDbContext<Infrastructure.Data.UsersContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<Infrastructure.Data.UsersContext>(options =>options.UseSqlServer(connection));
             services.AddMemoryCache();
         }
 
