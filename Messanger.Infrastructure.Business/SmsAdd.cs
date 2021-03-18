@@ -17,19 +17,14 @@ namespace Messanger.Infrastructure.Business
             db = context;
         }
         public MessageEntity AddSms(AccountEntity sender, string text, AccountEntity recepient)
-        {
-            MessageEntity counter = db.Sms.OrderByDescending(x => x.Number).FirstOrDefault();
-            int count = 1;
-            if (counter.Number != 0)
-            {
-                count = 1 + counter.Number;
-            }
+        {          
+            DateTime time = DateTime.Now;
             MessageEntity sms = new MessageEntity
             {
-                Sender = sender.Id,
+                Sender = sender.Login,
                 Sms = text,
-                Recipient = recepient.Id,
-                Number = count
+                Recipient = recepient.Login,
+                Time = time
             };
             return sms;
         }
