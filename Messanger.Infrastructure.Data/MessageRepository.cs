@@ -17,19 +17,19 @@ namespace Messanger.Infrastructure.Data
             db = context;
         }
 
-        public async Task<MessageEntity[]> GetMessageList()
+        public async Task<IQueryable<MessageEntity>> GetMessageList()
         {
-            MessageEntity[] sms = await db.Sms.ToArrayAsync();
+            IQueryable<MessageEntity> sms = db.Sms;
             await db.SaveChangesAsync();
             return sms;
         }
 
-        public async Task<MessageEntity> CheckMessage(int sender)
+        public async Task<MessageEntity> CheckMessage(string sender)
         {
             MessageEntity sms = await db.Sms.FirstOrDefaultAsync(x => x.Sender == sender);
             return sms;
         }
-        public async Task<MessageEntity> GetMessage(int sender,int recepient)
+        public async Task<MessageEntity> GetMessage(string sender,string recepient)
         {
             MessageEntity sms = await db.Sms.FirstOrDefaultAsync(x => x.Sender == sender && x.Recipient == recepient);
             return sms;
