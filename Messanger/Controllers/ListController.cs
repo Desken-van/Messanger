@@ -45,14 +45,14 @@ namespace Messanger.Controllers
         }
         [Authorize]
         [HttpPost("/Smslist")]
-        public IActionResult SmsList(string username, string recepient)
+        public  async Task<IActionResult> SmsList(string username, string recepient)
         {
             if (username == null || recepient == null)
             {
                 return BadRequest();
             }
-            AccountEntity user = repoacc.CheckAccount(username);
-            AccountEntity recepienter = repoacc.CheckAccount(recepient);
+            AccountEntity user = await repoacc.CheckAccount(username);
+            AccountEntity recepienter =await  repoacc.CheckAccount(recepient);
             if (user == null || recepienter == null)
             {
                 return BadRequest();

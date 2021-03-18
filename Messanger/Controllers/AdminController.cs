@@ -6,19 +6,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Messanger.Infrastructure.Data;
+using Messanger.Domain.Interfaces;
 
 namespace Messanger.Controllers
 {
     public class AdminController:Controller
     {
         UsersContext db;
-        public AdminController(UsersContext context)
+        IAccountRepository repoacc;
+        public AdminController(UsersContext context ,IAccountRepository r)
         {
             db = context;
+            repoacc = r; 
         }
+        
         [Authorize(Roles = "Admin")]
         [HttpPost("/block")]
-        public IActionResult Block(string username)
+        public async Task<IActionResult> Block(string username)
         {
             if (username == null)
             {
@@ -26,7 +30,7 @@ namespace Messanger.Controllers
             }           
             else
             {
-                AccountEntity user = db.Logins.FirstOrDefault(x => x.Login == username);
+                AccountEntity user = await repoacc.CheckAccount(username);
                 if (user == null)
                 {
                     return BadRequest();
@@ -36,8 +40,7 @@ namespace Messanger.Controllers
                     if (user.Status == "Active")
                     {
                         user.Status = "Blocked";
-                        db.Logins.Update(user);
-                        db.SaveChanges();
+                        await repoacc.Update(user);
                         var response = Ok();
                         return Json(response);
                     }
@@ -52,7 +55,7 @@ namespace Messanger.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("/unblock")]
-        public IActionResult UnBlock(string username)
+        public async Task<IActionResult> UnBlock(string username)
         {
             if (username == null)
             {
@@ -60,7 +63,7 @@ namespace Messanger.Controllers
             }
             else
             {
-                AccountEntity user = db.Logins.FirstOrDefault(x => x.Login == username);
+                AccountEntity user = await repoacc.CheckAccount(username);
                 if (user == null)
                 {
                     return BadRequest();
@@ -70,8 +73,7 @@ namespace Messanger.Controllers
                     if (user.Status == "Blocked")
                     {
                         user.Status = "Active";
-                        db.Logins.Update(user);
-                        db.SaveChanges();
+                        await repoacc.Update(user);
                         var response = Ok();
                         return Json(response);
                     }
@@ -86,7 +88,7 @@ namespace Messanger.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("/putrole")]
-        public IActionResult Putrole(string username)
+        public async Task<IActionResult> Putrole(string username)
         {
             if (username == null)
             {
@@ -94,7 +96,7 @@ namespace Messanger.Controllers
             }
             else
             {
-                AccountEntity user = db.Logins.FirstOrDefault(x => x.Login == username);
+                AccountEntity user = await repoacc.CheckAccount(username);
                 if (user == null)
                 {
                     return BadRequest();
@@ -104,8 +106,7 @@ namespace Messanger.Controllers
                     if (user.Role == "User")
                     {
                         user.Role = "Admin";
-                        db.Logins.Update(user);
-                        db.SaveChanges();
+                        await repoacc.Update(user);
                         var response = Ok();
                         return Json(response);
                     }
@@ -120,7 +121,7 @@ namespace Messanger.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPost("/unrole")]
-        public IActionResult Unrole(string username)
+        public async Task<IActionResult> Unrole(string username)
         {
             if (username == null)
             {
@@ -128,7 +129,7 @@ namespace Messanger.Controllers
             }
             else
             {
-                AccountEntity user = db.Logins.FirstOrDefault(x => x.Login == username);
+                AccountEntity user = await repoacc.CheckAccount(username);
                 if (user == null)
                 {
                     return BadRequest();
@@ -138,8 +139,7 @@ namespace Messanger.Controllers
                     if (user.Role == "Admin")
                     {
                         user.Role = "User";
-                        db.Logins.Update(user);
-                        db.SaveChanges();
+                        await repoacc.Update(user);
                         var response = Ok();
                         return Json(response);
                     }

@@ -86,12 +86,11 @@ namespace Messanger
                     });
             services.AddControllersWithViews();
             services.AddSession();
-            services.AddTransient<IAccountRepository, AccountRepository>();
-            services.AddTransient<IAddUser, UserAdd>();
-            services.AddTransient<IMessageRepository,MessageRepository >();
-            services.AddTransient<IAddSms,SmsAdd>();
+            services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IAddUser, UserAdd>();
+            services.AddScoped<IMessageRepository,MessageRepository >();
+            services.AddScoped<IAddSms,SmsAdd>();
             services.AddDbContext<Infrastructure.Data.UsersContext>(options =>options.UseSqlServer(connection));
-            services.AddMemoryCache();
         }
 
         public void Configure(IApplicationBuilder app)

@@ -8,6 +8,7 @@ using Messanger.Domain.Core;
 using Messanger.Services.Interfaces;
 using Messanger.Domain.Interfaces;
 using Messanger.Infrastructure.Data;
+using System.Threading.Tasks;
 
 namespace Messanger.Controllers
 {
@@ -26,14 +27,14 @@ namespace Messanger.Controllers
         }
         [Authorize]
         [HttpPost("/sms")]
-        public IActionResult Sms(string username, string text, string recepient)
+        public async Task<IActionResult> Sms(string username, string text, string recepient)
         {
-            AccountEntity user = repoacc.CheckAccount(username);
+            AccountEntity user = await repoacc.CheckAccount(username);
             if (user == null)
             {
                 return BadRequest();
             }
-            AccountEntity recepienter = repoacc.CheckAccount(recepient);
+            AccountEntity recepienter =await  repoacc.CheckAccount(recepient);
             if (recepienter == null || recepienter.Status == "Blocked")
             {
                 return BadRequest();
@@ -41,8 +42,7 @@ namespace Messanger.Controllers
             else
             {
                 MessageEntity sms = addsms.AddSms(user, text, recepienter);
-                reposms.Create(sms);
-                reposms.Save();
+                await reposms.Create(sms);
                 var response = Ok();
                 return Json(response);
             }

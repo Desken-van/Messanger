@@ -16,6 +16,7 @@ using Messanger.Domain.Core;
 using Messanger.Domain.Interfaces;
 using Messanger.Services.Interfaces;
 using Messanger.Infrastructure.Data;
+using System.Threading.Tasks;
 
 namespace Messanger.Controllers
 {
@@ -35,10 +36,9 @@ namespace Messanger.Controllers
         public Models.ProgramModels.AuthorizationOptions authoption { get; private set; }
            
         [HttpPost("/token")]
-        public IActionResult Token(string username, string password)
-        {
-            //AccountEntity user = db.Logins.FirstOrDefault(x => x.Login == username);           
-            AccountEntity user = repoacc.CheckAccount(username);
+        public async Task<IActionResult> Token(string username, string password)
+        {        
+            AccountEntity user = await repoacc.CheckAccount(username);
             if (user == null)
             {
                 return BadRequest();
@@ -51,8 +51,7 @@ namespace Messanger.Controllers
             }
             else 
             {
-                //AccountEntity account = db.Logins.FirstOrDefault(x => x.Login == username && x.Password == user.Password);
-                AccountEntity account = repoacc.GetAccount(username,user.Password);
+                AccountEntity account = await repoacc.GetAccount(username,user.Password);
                 if (account == null)
                 {
                     return BadRequest(new { errorText = "Invalid username or password." });
@@ -107,14 +106,14 @@ namespace Messanger.Controllers
             return null;
         }
         [HttpPost("/register")]
-        public IActionResult Register(string username, string password)
+        public async Task<IActionResult> Register(string username, string password)
         {
             if ((password.Length > 12 && password.Length < 4)||username == null)
             {
                 return BadRequest(new { errorText = "Invalid username or password." });
             }
             else {              
-                AccountEntity[] bigdata = (AccountEntity[])repoacc.GetAccountList();
+                AccountEntity[] bigdata = await repoacc.GetAccountList();
                 for (int i = 0; i < bigdata.Length; i++)
                 {
                     if (username == bigdata[i].Login)
@@ -122,13 +121,8 @@ namespace Messanger.Controllers
                         return BadRequest();
                     }
                 }
-                AccountEntity user = adduser.AddUser(username, HashPassword(password));               
-                if (user == null)
-                {
-                    return BadRequest();
-                }
-                repoacc.Create(user);
-                repoacc.Save();
+                AccountEntity user =  adduser.AddUser(username, HashPassword(password));
+                await repoacc.Create(user);
                 var response = Ok();
                 return Json(response);
             }
