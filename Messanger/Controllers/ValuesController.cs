@@ -18,12 +18,19 @@ namespace Messanger.Controllers
             return Ok($"Ваш логин: {User.Identity.Name}");
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [Route("getrole")]
         [HttpGet]
         public IActionResult GetRole()
         {
-            return Ok("Ваша роль: администратор");
+            if (User.IsInRole("Admin") == true) 
+            {
+                return Ok("Ваша роль: администратор");
+            }
+            else
+            {
+                return Ok("Ваша роль: пользователь");
+            }            
         }                     
     }
 }
