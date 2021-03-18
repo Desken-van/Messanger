@@ -14,10 +14,12 @@ namespace Messanger.Controllers
     {
         UsersContext db;
         IAccountRepository repoacc;
-        public ListController(UsersContext context, IAccountRepository r)
+        IMessageRepository reposms;
+        public ListController(UsersContext context, IAccountRepository r,IMessageRepository m)
         {
             db = context;
-            repoacc = r;      
+            repoacc = r;
+            reposms = m;
         }
         [Authorize]
         [HttpPost("/Userlist")]
@@ -45,30 +47,35 @@ namespace Messanger.Controllers
         }
         [Authorize]
         [HttpPost("/Smslist")]
-        public  async Task<IActionResult> SmsList(string username, string recepient)
+        public async Task<IActionResult> SmsList(string username, string recepient)
         {
             if (username == null || recepient == null)
             {
                 return BadRequest();
             }
             AccountEntity user = await repoacc.CheckAccount(username);
-            AccountEntity recepienter =await  repoacc.CheckAccount(recepient);
+            AccountEntity recepienter = await repoacc.CheckAccount(recepient);
             if (user == null || recepienter == null)
             {
                 return BadRequest();
             }
 
-            IQueryable<MessageEntity> bigdata = db.Sms;
-            IQueryable<string> datasms= from p in bigdata
-                                         where (p.Sender == user.Id && p.Recipient == recepienter.Id) || (p.Recipient == user.Id && p.Sender == recepienter.Id)
-                                         orderby p.Number                                 
-                                         select p.Sender +":"+p.Sms;            
-            
+            IQueryable<MessageEntity> bigdata = await reposms.GetMessageList() ;
+            IQueryable<MessageEntity> datasms = from p in bigdata
+                                                where (p.Sender == user.Login && p.Recipient == recepienter.Login) || (p.Recipient == user.Login && p.Sender == recepienter.Login)
+                                                orderby p.Time
+                                                select p;
+            IQueryable<string> sms = from p in bigdata
+                                                where (p.Sender == user.Login && p.Recipient == recepienter.Login) || (p.Recipient == user.Login && p.Sender == recepienter.Login)
+                                                orderby p.Time
+                                                select $"____________________________________\n||From:{p.Sender}|\n \n {p.Sms} \n \n|To:{p.Recipient}|  |{p.Time}||\n____________________________________\n";
+
             var response = new
             {
-                datasms
+                datasms,
+                sms
             };
             return Json(response);
-        }      
+        }   
     }
 }
