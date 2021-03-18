@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Messanger.Domain.Core;
 using Messanger.Domain.Interfaces;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Messanger.Infrastructure.Data
 {
@@ -18,43 +17,42 @@ namespace Messanger.Infrastructure.Data
             db = context;
         }
 
-        public IEnumerable<AccountEntity> GetAccountList()
+        public async Task<AccountEntity[]> GetAccountList()
         {
-            return db.Logins.ToArray();
-        }
-
-        public AccountEntity CheckAccount(string username)
-        {
-            AccountEntity user = db.Logins.FirstOrDefault(x => x.Login == username);
+            AccountEntity[] user = await db.Logins.ToArrayAsync();
+            await db.SaveChangesAsync();
             return user;
         }
-        public AccountEntity GetAccount(string username,string password)
+
+        public async Task<AccountEntity> CheckAccount(string username)
         {
-            AccountEntity user = db.Logins.FirstOrDefault(x => x.Login == username && x.Password == password);
+            AccountEntity user = await db.Logins.FirstOrDefaultAsync(x => x.Login == username);
             return user;
         }
-        public void Create(AccountEntity book)
+        public async Task<AccountEntity> GetAccount(string username,string password)
         {
-            db.Logins.Add(book);
+            AccountEntity user = await db.Logins.FirstOrDefaultAsync(x => x.Login == username && x.Password == password);
+            return user;
+        }
+        public async Task Create(AccountEntity account)
+        {
+           await db.Logins.AddAsync(account);
+           await db.SaveChangesAsync();
         }
 
-        public void Update(AccountEntity book)
+        public async Task Update(AccountEntity account)
         {
-            db.Entry(book).State = (Microsoft.EntityFrameworkCore.EntityState)EntityState.Modified;
+            await Task.Run(() => db.Entry(account).State = EntityState.Modified);
+            await  db.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            AccountEntity book = db.Logins.Find(id);
-            if (book != null)
-                db.Logins.Remove(book);
+            AccountEntity account = await db.Logins.FindAsync(id);
+            if (account != null)
+                await Task.Run(() => db.Logins.Remove(account));
+            await db.SaveChangesAsync();
         }
-
-        public void Save()
-        {
-            db.SaveChanges();
-        }
-
         private bool disposed = false;
 
         public virtual void Dispose(bool disposing)

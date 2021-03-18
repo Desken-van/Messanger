@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Messanger.Domain.Core;
 using Messanger.Domain.Interfaces;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Messanger.Infrastructure.Data
 {
@@ -18,41 +17,41 @@ namespace Messanger.Infrastructure.Data
             db = context;
         }
 
-        public IEnumerable<MessageEntity> GetAccountList()
+        public async Task<MessageEntity[]> GetMessageList()
         {
-            return db.Sms.ToArray();
-        }
-
-        public MessageEntity CheckMessage(int sender)
-        {
-            MessageEntity sms = db.Sms.FirstOrDefault(x => x.Sender == sender);
+            MessageEntity[] sms = await db.Sms.ToArrayAsync();
+            await db.SaveChangesAsync();
             return sms;
         }
-        public MessageEntity GetMessage(int sender,int recepient)
+
+        public async Task<MessageEntity> CheckMessage(int sender)
         {
-            MessageEntity sms = db.Sms.FirstOrDefault(x => x.Sender == sender && x.Recipient == recepient);
+            MessageEntity sms = await db.Sms.FirstOrDefaultAsync(x => x.Sender == sender);
             return sms;
         }
-        public void Create(MessageEntity item)
+        public async Task<MessageEntity> GetMessage(int sender,int recepient)
         {
-            db.Sms.Add(item);
+            MessageEntity sms = await db.Sms.FirstOrDefaultAsync(x => x.Sender == sender && x.Recipient == recepient);
+            return sms;
+        }
+        public async Task Create(MessageEntity sms)
+        {
+           await db.Sms.AddAsync(sms);
+           await db.SaveChangesAsync();
         }
 
-        public void Update(MessageEntity item)
+        public async Task Update(MessageEntity sms)
         {
-            db.Entry(item).State = (Microsoft.EntityFrameworkCore.EntityState)EntityState.Modified;
+            await Task.Run(() =>db.Entry(sms).State = EntityState.Modified);
+            await db.SaveChangesAsync();
         }
 
-        public void Delete(int id)
+        public async Task Delete(int id)
         {
-            MessageEntity sms = db.Sms.Find(id);
+            MessageEntity sms = await db.Sms.FindAsync(id);
             if (sms != null)
-                db.Sms.Remove(sms);
-        }
-
-        public void Save()
-        {
-            db.SaveChanges();
+                await Task.Run(() => db.Sms.Remove(sms));
+            await db.SaveChangesAsync();
         }
 
         private bool disposed = false;
