@@ -20,7 +20,6 @@ namespace Messanger.Infrastructure.Data
         public async Task<AccountEntity[]> GetAccountList()
         {
             AccountEntity[] user = await db.Logins.ToArrayAsync();
-            await db.SaveChangesAsync();
             return user;
         }
 
