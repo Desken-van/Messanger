@@ -1,0 +1,9 @@
+S:\Labs\Messanger.Domain.DataBase\bin\Debug\netstandard2.0\Messanger.Domain.DataBase.deps.json
+S:\Labs\Messanger.Domain.DataBase\bin\Debug\netstandard2.0\Messanger.Domain.DataBase.dll
+S:\Labs\Messanger.Domain.DataBase\bin\Debug\netstandard2.0\Messanger.Domain.DataBase.pdb
+S:\Labs\Messanger.Domain.DataBase\obj\Debug\netstandard2.0\Messanger.Domain.DataBase.csprojAssemblyReference.cache
+S:\Labs\Messanger.Domain.DataBase\obj\Debug\netstandard2.0\Messanger.Domain.DataBase.AssemblyInfoInputs.cache
+S:\Labs\Messanger.Domain.DataBase\obj\Debug\netstandard2.0\Messanger.Domain.DataBase.AssemblyInfo.cs
+S:\Labs\Messanger.Domain.DataBase\obj\Debug\netstandard2.0\Messanger.Domain.DataBase.csproj.CoreCompileInputs.cache
+S:\Labs\Messanger.Domain.DataBase\obj\Debug\netstandard2.0\Messanger.Domain.DataBase.dll
+S:\Labs\Messanger.Domain.DataBase\obj\Debug\netstandard2.0\Messanger.Domain.DataBase.pdb
