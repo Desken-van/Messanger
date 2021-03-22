@@ -17,7 +17,7 @@ namespace Messanger.Domain.Repository
         {
             db = context;
         }
-        public async Task<List<Account>> GetAccountList()
+        public async Task<IEnumerable<Account>> GetAccountList()
         {
             AccountEntity[] bigdata = await db.Logins.ToArrayAsync();
             var users = from p in bigdata
@@ -33,11 +33,14 @@ namespace Messanger.Domain.Repository
 
             var users_and_admins = users.Union(admins);
             var datausers = users_and_admins.Union(blocks);
-            List<Account> data = new List<Account>();
-            foreach (AccountEntity s in datausers)
+            var data = datausers.Select(x => new Account
             {
-                data.Add(s);
-            }
+                Id = x.Id,
+                Login= x.Login,
+                Password = x.Password,
+                Role = x.Role,
+                Status = x.Status
+            });
             return data;      
         }
         public async Task<List<string>> GetAccountSite()
@@ -65,13 +68,29 @@ namespace Messanger.Domain.Repository
         }
         public async Task<Account> CheckAccount(string username)
         {
-            AccountEntity user = await db.Logins.FirstOrDefaultAsync(x => x.Login == username);           
-            return user;
+            AccountEntity user = await db.Logins.FirstOrDefaultAsync(x => x.Login == username);
+            Account result = new Account
+            {
+                Id = user.Id,
+                Login = user.Login,
+                Password = user.Password,
+                Role = user.Role,
+                Status = user.Status
+            };
+            return result;
         }
         public async Task<Account> GetAccount(string username,string password)
         {
             AccountEntity user = await db.Logins.FirstOrDefaultAsync(x => x.Login == username && x.Password == password);
-            return user;
+            Account result = new Account
+            {
+                Id = user.Id,
+                Login = user.Login,
+                Password = user.Password,
+                Role = user.Role,
+                Status = user.Status
+            };
+            return result;
         }
         public async Task Add(string username, string password)
         {
