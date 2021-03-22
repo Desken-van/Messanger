@@ -108,10 +108,10 @@ namespace Messanger.Controllers
                 return BadRequest(new { errorText = "Invalid username or password." });
             }
             else {              
-                List<Account> bigdata = await repoacc.GetAccountList();
-                for (int i = 0; i < bigdata.Count; i++)
+                IEnumerable<Account> bigdata = await repoacc.GetAccountList();
+                foreach (Account s in bigdata)
                 {
-                    if (username == bigdata[i].Login)
+                    if (username == s.Login)
                     {
                         return BadRequest();
                     }
