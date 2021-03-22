@@ -77,7 +77,7 @@
                     body: formData
                 });
                 const data = await responselist.json();
-                document.getElementById("list").innerText = data; 
+                document.getElementById("list").innerText = data.datausers;
             }
             else {
                 console.log("Error: ", response.status, data.errorText);
