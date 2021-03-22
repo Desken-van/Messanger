@@ -11,7 +11,7 @@ namespace Messanger.Domain.Interfaces
 {
     public interface IAccountRepository : IDisposable
     {
-        Task<List<Account>> GetAccountList();
+        Task<IEnumerable<Account>> GetAccountList();
         Task<List<string>> GetAccountSite();
         Task<Account> CheckAccount(string username);
         Task<Account> GetAccount(string username,string password);
