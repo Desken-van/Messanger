@@ -8,7 +8,6 @@ namespace Messanger.Models.InterfaceModels
     public class AccountResponse
     {
         public string Login { get; set; }
-        public string Password { get; set; }
         public string Role { get; set; }
     
         public string Status { get; set; }
