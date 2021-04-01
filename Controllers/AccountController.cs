@@ -117,7 +117,7 @@ namespace Messanger.Controllers
                     }
                 }
                 await repoacc.Add(username, HashPassword(password));
-                return Ok();
+                return Json(Ok());
             }
         }
         public static string HashPassword(string password)
